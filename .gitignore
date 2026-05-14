@@ -1,0 +1,10 @@
+.venv
+.idea
+.env
+.env-test
+__pycache__/
+.pytest_cache/
+*.log
+*.tmp
+*.swp
+dump.rdb
