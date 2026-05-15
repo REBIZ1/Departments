@@ -4,12 +4,14 @@ from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 
 from src.api.departments import router as router_departments
+from src.api.employees import router as router_employees
 
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(docs_url=None)
 
 app.include_router(router_departments)
+app.include_router(router_employees)
 
 
 @app.get("/docs", include_in_schema=False)
