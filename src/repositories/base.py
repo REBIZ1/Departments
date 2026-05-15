@@ -3,8 +3,12 @@ import logging
 from asyncpg import UniqueViolationError
 from pydantic import BaseModel
 from sqlalchemy import insert, update, delete, select
+from sqlalchemy.exc import NoResultFound
 
-from src.exceptions.exceptions import ObjectAlreadyExistsException
+from src.exceptions.exceptions import (
+    ObjectAlreadyExistsException,
+    ObjectNotFoundException,
+)
 from src.repositories.mappers.base import DataMapper
 
 
@@ -22,6 +26,18 @@ class BaseRepository:
         query = select(self.model).filter(*filter).filter_by(**filter_by)
         result = await self.session.execute(query)
         return [self.mapper.map_to_domain_entity(obj) for obj in result.scalars().all()]
+
+    async def get_one(self, *filter, **filter_by):
+        """
+        Принимает аргументы для фильтрации и возвращает одно значение
+        """
+        query = select(self.model).filter(*filter).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        try:
+            obj = result.scalars().one()
+        except NoResultFound:
+            raise ObjectNotFoundException
+        return self.mapper.map_to_domain_entity(obj)
 
     async def add(self, data: BaseModel):
         """
