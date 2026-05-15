@@ -23,3 +23,16 @@ class ObjectAlreadyExistsException(BaseException):
 class DepartmentAlreadyExistsHTTPException(BaseHTTPException):
     status_code = 409
     detail = "Подразделение уже существует"
+
+
+class ObjectNotFoundException(BaseException):
+    detail = "Объект не найден"
+
+
+class DepartmentNotFoundException(BaseException):
+    detail = "Подразделение не найдено"
+
+
+class DepartmentNotFoundHTTPException(BaseHTTPException):
+    status_code = 404
+    detail = "Подразделение не найдено"
