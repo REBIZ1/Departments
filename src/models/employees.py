@@ -10,18 +10,15 @@ class EmployeesOrm(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     department_id: Mapped[int] = mapped_column(
-        ForeignKey("departments.id", ondelete="CASCADE"),
-        index=True
+        ForeignKey("departments.id", ondelete="CASCADE"), index=True
     )
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
     position: Mapped[str] = mapped_column(String(200), nullable=False)
     hired_at: Mapped[date | None]
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
 
     department: Mapped["DepartmentsOrm"] = relationship(
-        "DepartmentsOrm",
-        back_populates="employees"
+        "DepartmentsOrm", back_populates="employees"
     )

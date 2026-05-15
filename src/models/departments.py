@@ -13,29 +13,24 @@ class DepartmentsOrm(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     parent_id: Mapped[int | None] = mapped_column(
-        ForeignKey("departments.id", ondelete="CASCADE"),
-        nullable=True,
-        index=True
+        ForeignKey("departments.id", ondelete="CASCADE"), nullable=True, index=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
 
     parent: Mapped["DepartmentsOrm"] = relationship(
-        "DepartmentsOrm",
-        remote_side=[id],
-        back_populates="children"
+        "DepartmentsOrm", remote_side=[id], back_populates="children"
     )
     children: Mapped[list["DepartmentsOrm"]] = relationship(
         "DepartmentsOrm",
         back_populates="parent",
         cascade="all, delete",
-        passive_deletes=True
+        passive_deletes=True,
     )
     employees: Mapped[list["EmployeesOrm"]] = relationship(
         "EmployeesOrm",
         back_populates="department",
         cascade="all, delete",
-        passive_deletes=True
+        passive_deletes=True,
     )
