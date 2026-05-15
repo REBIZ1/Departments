@@ -4,6 +4,8 @@ from src.api.dependencies.dependencies import DBDep
 from src.exceptions.exceptions import (
     ObjectAlreadyExistsException,
     DepartmentAlreadyExistsHTTPException,
+    DepartmentNotFoundException,
+    DepartmentNotFoundHTTPException,
 )
 from src.schemas.departments import DepartmentAdd
 from src.services.departments import DepartmentService
@@ -20,4 +22,6 @@ async def create_department(db: DBDep, data: DepartmentAdd):
         department = await DepartmentService(db).create_department(data)
     except ObjectAlreadyExistsException:
         raise DepartmentAlreadyExistsHTTPException
+    except DepartmentNotFoundException:
+        raise DepartmentNotFoundHTTPException
     return department
