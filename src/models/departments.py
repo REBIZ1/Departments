@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import ForeignKey, DateTime, String, UniqueConstraint, func
+from sqlalchemy import ForeignKey, DateTime, String, UniqueConstraint, func, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -8,7 +8,10 @@ from src.database import Base
 class DepartmentsOrm(Base):
     __tablename__ = "departments"
 
-    __table_args__ = UniqueConstraint("parent_id", "name", name="unique_department")
+    __table_args__ = (
+        UniqueConstraint("parent_id", "name", name="unique_department"),
+        CheckConstraint("length(name) >= 1", name="check_department_name"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)

@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from sqlalchemy import ForeignKey, DateTime, String, func
+from sqlalchemy import ForeignKey, DateTime, String, func, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -7,6 +7,11 @@ from src.database import Base
 
 class EmployeesOrm(Base):
     __tablename__ = "employees"
+
+    __table_args__ = (
+        CheckConstraint("length(full_name) >= 1", name="check_employees_full_name"),
+        CheckConstraint("length(position) >= 1", name="check_employees_position"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     department_id: Mapped[int] = mapped_column(
