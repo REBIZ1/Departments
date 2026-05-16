@@ -19,3 +19,9 @@ class DepartmentsRepository(BaseRepository):
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_children(self, parent_id: int):
+        """
+        Получить вложенные подразделения
+        """
+        return await self.get_filtered(parent_id=parent_id)
