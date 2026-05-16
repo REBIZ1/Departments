@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 
+from src.schemas.employees import Employee
+
 
 class DepartmentAdd(BaseModel):
     name: str = Field(min_length=1, max_length=200)
@@ -22,3 +24,12 @@ class Department(DepartmentAdd):
 
 class DepartmentPatch(DepartmentAdd):
     name: str | None = Field(None, min_length=1, max_length=200)
+
+
+class DepartmentTree(BaseModel):
+    department: Department
+    employees: list[Employee] = []
+    children: list["DepartmentTree"] = []
+
+
+DepartmentTree.model_rebuild()
