@@ -43,7 +43,9 @@ class DepartmentService(BaseService):
         """
         employees = []
         if include_employees:
-            employees = await self.db.employees.get_employees_from_department(department.id)
+            employees = await self.db.employees.get_employees_from_department(
+                department.id
+            )
         children = []
         if depth > 0:
             child_departments = await self.db.departments.get_children(department.id)
