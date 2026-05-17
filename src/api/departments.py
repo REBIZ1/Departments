@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Query
+from typing import Literal
+from fastapi import APIRouter, Query, Response
 
 from src.api.dependencies.dependencies import DBDep
 from src.exceptions.exceptions import (
@@ -10,6 +11,8 @@ from src.exceptions.exceptions import (
     DepartmentCannotBeSelfChildHTTPException,
     DepartmentHierarchyLoopException,
     DepartmentHierarchyLoopHTTPException,
+    SourceAndTargetDepartmentsAreSameException,
+    SourceAndTargetDepartmentsAreSameHTTPException,
 )
 from src.schemas.departments import DepartmentAdd, DepartmentPatch
 from src.services.departments import DepartmentService
@@ -68,3 +71,26 @@ async def update_department(db: DBDep, id: int, data: DepartmentPatch):
     except DepartmentNotFoundException:
         raise DepartmentNotFoundHTTPException
     return department
+
+
+@router.delete("/{id}", status_code=204, summary="Удалить подразделение")
+async def delete_department(
+    db: DBDep,
+    id: int,
+    mode: Literal["cascade", "reassign"],
+    reassign_to_department_id: int | None = None,
+):
+    """
+    Удаляет подразделение
+    """
+    try:
+        await DepartmentService(db).delete_department(
+            department_id=id,
+            mode=mode,
+            reassign_to_department_id=reassign_to_department_id,
+        )
+    except DepartmentNotFoundException:
+        raise DepartmentNotFoundHTTPException
+    except SourceAndTargetDepartmentsAreSameException:
+        raise SourceAndTargetDepartmentsAreSameHTTPException
+    return Response(status_code=204)
