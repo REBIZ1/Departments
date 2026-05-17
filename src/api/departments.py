@@ -6,8 +6,12 @@ from src.exceptions.exceptions import (
     DepartmentAlreadyExistsHTTPException,
     DepartmentNotFoundException,
     DepartmentNotFoundHTTPException,
+    DepartmentCannotBeSelfChildException,
+    DepartmentCannotBeSelfChildHTTPException,
+    DepartmentHierarchyLoopException,
+    DepartmentHierarchyLoopHTTPException,
 )
-from src.schemas.departments import DepartmentAdd
+from src.schemas.departments import DepartmentAdd, DepartmentPatch
 from src.services.departments import DepartmentService
 
 router = APIRouter(prefix="/departments", tags=["Подразделения"])
@@ -43,6 +47,24 @@ async def get_department(
             depth=depth,
             include_employees=include_employees,
         )
+    except DepartmentNotFoundException:
+        raise DepartmentNotFoundHTTPException
+    return department
+
+
+@router.patch("/{id}", summary="Изменить подразделение")
+async def update_department(db: DBDep, id: int, data: DepartmentPatch):
+    """
+    Изменяет подразделение
+    """
+    try:
+        department = await DepartmentService(db).update_department(
+            department_id=id, data=data
+        )
+    except DepartmentCannotBeSelfChildException:
+        raise DepartmentCannotBeSelfChildHTTPException
+    except DepartmentHierarchyLoopException:
+        raise DepartmentHierarchyLoopHTTPException
     except DepartmentNotFoundException:
         raise DepartmentNotFoundHTTPException
     return department
