@@ -82,3 +82,15 @@ class BaseRepository:
         """
         delete_stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(delete_stmt)
+
+    async def reassign(self, old_id: int, new_id: int | None, field_name: str):
+        """
+        Массово обновляет значение внешнего ключа у записей модели
+        """
+        field = getattr(self.model, field_name)
+        stmt = (
+            update(self.model)
+            .where(field == old_id)
+            .values({field_name: new_id})
+        )
+        await self.session.execute(stmt)
