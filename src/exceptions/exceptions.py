@@ -54,3 +54,12 @@ class DepartmentCannotBeSelfChildHTTPException(BaseHTTPException):
 class DepartmentHierarchyLoopHTTPException(BaseHTTPException):
     status_code = 400
     detail = "Старший отдел не может быть дочерним для младшего"
+
+
+class SourceAndTargetDepartmentsAreSameException(BaseException):
+    detail = "ID отдела для удаления и ID целевого отдела не должны совпадать"
+
+
+class SourceAndTargetDepartmentsAreSameHTTPException(BaseHTTPException):
+    status_code = 400
+    detail = "ID отдела для удаления и ID целевого отдела не должны совпадать"
