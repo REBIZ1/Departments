@@ -3,7 +3,7 @@ import logging
 from asyncpg import UniqueViolationError
 from pydantic import BaseModel
 from sqlalchemy import insert, update, delete, select
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from src.exceptions.exceptions import (
     ObjectAlreadyExistsException,
@@ -50,7 +50,7 @@ class BaseRepository:
             result = await self.session.execute(add_stmt)
             obj = result.scalars().one()
             return self.mapper.map_to_domain_entity(obj)
-        except InterruptedError as e:
+        except IntegrityError as e:
             logging.error(
                 f"Не удалось добавить данные в БД, тип ошибки: {type(e.orig.__cause__)=}"
             )
@@ -70,8 +70,11 @@ class BaseRepository:
             update(self.model)
             .filter_by(**filter_by)
             .values(**data.model_dump(exclude_unset=exclude_unset))
+            .returning(self.model)
         )
-        await self.session.execute(edit_stmt)
+        result = await self.session.execute(edit_stmt)
+        obj = result.scalars().one()
+        return self.mapper.map_to_domain_entity(obj)
 
     async def delete(self, **filter_by):
         """
