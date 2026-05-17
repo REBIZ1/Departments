@@ -4,6 +4,7 @@ from src.exceptions.exceptions import (
     DepartmentNotFoundException,
     DepartmentCannotBeSelfChildException,
     DepartmentHierarchyLoopException,
+    SourceAndTargetDepartmentsAreSameException,
 )
 from src.schemas.departments import DepartmentAdd, DepartmentTree, DepartmentPatch
 from src.services.base import BaseService
@@ -100,13 +101,43 @@ class DepartmentService(BaseService):
             if parent_id is not None:
                 await self.get_department_with_check(parent_id)
                 await self.validate_no_cycle(
-                    department_id=department_id,
-                    parent_id=parent_id
+                    department_id=department_id, parent_id=parent_id
                 )
         updated_department = await self.db.departments.edit(
-            data=data,
-            exclude_unset=True,
-            id=department_id
+            data=data, exclude_unset=True, id=department_id
         )
         await self.db.commit()
         return updated_department
+
+    async def delete_department(
+        self,
+        department_id: int,
+        mode: str,
+        reassign_to_department_id: int | None = None,
+    ):
+        """
+        Удаляет подразделение
+        """
+        await self.get_department_with_check(department_id)
+        if department_id == reassign_to_department_id:
+            raise SourceAndTargetDepartmentsAreSameException
+
+        department = await self.db.departments.get_one(id=department_id)
+        if mode == "cascade":
+            await self.db.departments.delete(id=department_id)
+        elif mode == "reassign":
+            await self.get_department_with_check(reassign_to_department_id)
+            if reassign_to_department_id is None:
+                raise ValueError
+            await self.db.employees.reassign(
+                old_id=department_id,
+                new_id=reassign_to_department_id,
+                field_name="department_id",
+            )
+            await self.db.departments.reassign(
+                old_id=department_id,
+                new_id=department.parent_id,
+                field_name="parent_id",
+            )
+            await self.db.departments.delete(id=department_id)
+        await self.db.commit()
