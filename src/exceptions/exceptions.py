@@ -36,3 +36,21 @@ class DepartmentNotFoundException(BaseException):
 class DepartmentNotFoundHTTPException(BaseHTTPException):
     status_code = 404
     detail = "Подразделение не найдено"
+
+
+class DepartmentCannotBeSelfChildException(BaseException):
+    detail = "Подразделение не может быть подразделом самого себя"
+
+
+class DepartmentHierarchyLoopException(BaseException):
+    detail = "Старший отдел не может быть дочерним для младшего"
+
+
+class DepartmentCannotBeSelfChildHTTPException(BaseHTTPException):
+    status_code = 400
+    detail = "Подразделение не может быть подразделом самого себя"
+
+
+class DepartmentHierarchyLoopHTTPException(BaseHTTPException):
+    status_code = 400
+    detail = "Старший отдел не может быть дочерним для младшего"
